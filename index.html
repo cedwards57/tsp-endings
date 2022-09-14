@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script type="text/javascript" src="endings.json"></script>
+        <style>
+            .main {
+                padding: 20px;
+            }
+            .guideForm {
+                margin-top: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            Welcome to The Stanley Parable Endings Guide! This guide is designed to help you get all the endings in the original game, while avoiding any spoilers aside from suggesting places to go. IF you say you are playing Ultra Deluxe, this will include the <em>normal</em> branches added to the base game in Ultra Deluxe (after encountering new content), not any obvious new content in itself. This guide is only for endings: it does not contain easter eggs or extras, only paths where either the game restarts or you are forced to do so manually.
+            <br/>
+            <br/>
+            It's recommended that you play The Stanley Parable blind and get all the endings you can find exploring on your own, then start on this guide afterwards. Do what you want, though!
+            <br/>
+            <br/>
+            <a href="./tsp.html">Restart</a>
+            <br/>
+            <br/>
+            <div id="guide">
+                <div class="startForm">
+                    <input type="checkbox" id="ud"/>
+                    <label for="ud">I am playing Ultra Deluxe</label><br/>
+                    <button id="begin">Let's Begin</button>
+                </div>
+            </div>
+            <div id="endings">
+                <h3 id="achievedLabel">Endings Achieved</h3>
+                <ol id="endingList"></ol>
+            </div>
+            <div id="hints">
+                <h3>What to try next</h3>
+                <ul id="hintList"></ul>
+            </div>
+        <script>
+            var ultraDeluxe = false;
+            $(document).ready(function() {
+                var routes = endings;
+                // fetch('./endings.json').then(response => routes = response.json());
+                $(".startForm button").click(function() {
+                    branch("start",routes.start.paths,"begin",routes);
+                    $(this).parent().css("display", "none");
+                    $("#input1").addClass("inputs");
+                    ultraDeluxe = $("#ud").is(':checkbox:checked');
+                    if (ultraDeluxe) {
+                        $("#achievedLabel").append(" (out of 20)")
+                    } else {
+                        $("#achievedLabel").append(" (out of 18)")
+                    };
+                });
+                
+                $("#guide").on("click", ".guideForm button", function() {
+                    var question = $(this).attr("id");
+                    $("button#" + question).parent().css("display", "none");
+                    var checks = $(this).siblings("input");
+                    for (var i = 0; i < checks.length; i++) {
+                        var isChecked = $($(checks[i])[0]).is(':checkbox:checked');
+                        var id = $(checks[i]).attr("id");
+                        if (isChecked && "prompt" in routes[id]) {
+                            branch(id,routes[id].paths,question,routes);
+                        } else if (isChecked && "ending" in routes[id]) {
+                            ending(routes[id].ending);
+                        } else if (!isChecked) {
+                            hint(routes[id].hint);
+                        };
+                    };
+                });
+                
+                $("#guide").on("click", ".guideForm .inputs", function() {
+                    var sequence = ["input1", "input2", "input3", "input4", "heaven"];
+                    var phase = $(this).attr("id");
+                    var index = sequence.indexOf(phase);
+                    if ($(this).is(':checkbox:checked') && (index < 4)) {
+                        $(this).next().after($("<input/>").attr("type", "checkbox").attr("id",sequence[index+1]).attr("class", "inputs"));
+                        $("#" + phase).next().next().after($("<label></label>").text(routes[sequence[index+1]].option).attr("for",sequence[index+1]));
+                        $(this).next().after($("<br/>"));
+                    } else {
+                        for (var i = sequence.length-1; i > index; i--) {
+                            if ($("#" + sequence[i]).length) {
+                                var box = $("#" + sequence[i]);
+                                box.next().remove();
+                                box.next().remove();
+                                box.remove();
+                            };
+                        };
+                    };
+                });
+            });
+            function branch(base,options,clicked,routes) {
+                var guide = $("#guide");
+                guide.append($("<div></div>").attr("class", "guideForm " + base));
+                var form = $("div." + base);
+                form.append($("<div></div>").text(routes[base].prompt).attr("class", "prompt"));
+                for (var i = 0; i < options.length; i++) {
+                    if (!ultraDeluxe && "tspud" in routes[options[i]]) {
+                        continue;
+                    };
+                    if (ultraDeluxe && "non-tspud" in routes[options[i]]) {
+                        continue;
+                    };
+                    form.append($("<input/>").attr("type", "checkbox").attr("id", options[i]));
+                    form.append($("<label></label>").text(routes[options[i]].option).attr("for", options[i]));
+                    form.append($("<br/>"))
+                };
+                form.append($("<button></button>").attr("type", "submit").attr("id", base).text("Confirm"));
+            };
+            
+            function ending(endName) {
+                var endings = $("#endingList");
+                endings.append($("<li></li>").html(endName));
+            }
+            
+            function hint(hintName) {
+                var hints =  $("#hintList");
+                hints.append($("<li></li>").html(hintName));
+            }
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
